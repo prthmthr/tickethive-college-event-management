@@ -1,0 +1,212 @@
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse 70% 52% at 10% 26%, rgba(126, 97, 255, 0.16), transparent 68%),
+    radial-gradient(ellipse 58% 48% at 86% 58%, rgba(255, 124, 99, 0.13), transparent 72%),
+    linear-gradient(155deg, #f8fbff 0%, #eef3ff 43%, #fff7f3 100%);
+  background-attachment: fixed;
+  transition: background 240ms ease, color 180ms ease;
+}
+
+.site-footer {
+  margin-top: 2rem;
+  padding: 2.35rem 0 2rem;
+  background: #303030;
+  color: rgba(255, 255, 255, 0.46);
+}
+
+.footer-socials {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 1.55rem;
+}
+
+.footer-social-icon {
+  display: inline-grid;
+  width: 2.65rem;
+  height: 2.65rem;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.24);
+  color: #303030;
+  font-size: 1.3rem;
+  transition: transform 160ms ease, background-color 160ms ease, color 160ms ease;
+}
+
+.footer-social-icon:hover {
+  background: #fff;
+  color: #0d6efd;
+  transform: translateY(-0.2rem);
+}
+
+.footer-copyright {
+  color: rgba(255, 255, 255, 0.44);
+  font-size: 0.9rem;
+}
+
+.footer-note {
+  max-width: 78rem;
+  margin-inline: auto;
+  color: rgba(255, 255, 255, 0.34);
+  font-size: 0.82rem;
+}
+
+.card {
+  border: 0;
+  border-radius: 0.85rem;
+  transition: background-color 180ms ease, box-shadow 180ms ease;
+}
+
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.theme-icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.stat-card {
+  border-left: 0.25rem solid #0d6efd;
+}
+
+.event-card {
+  border-top: 0.25rem solid #0d6efd;
+  overflow: hidden;
+}
+
+.event-cover-image {
+  width: 100%;
+  height: 190px;
+  object-fit: cover;
+  background: #e9ecef;
+}
+
+.event-detail-card {
+  border-top: 0.25rem solid #0d6efd;
+}
+
+.event-detail-image {
+  width: 100%;
+  min-height: 100%;
+  height: 100%;
+  max-height: 34rem;
+  object-fit: cover;
+  background: #e9ecef;
+}
+
+.search-filter-card {
+  border-top: 0.2rem solid rgba(13, 110, 253, 0.5);
+}
+
+.attendance-chart-wrapper {
+  position: relative;
+  height: 21rem;
+}
+
+.event-location {
+  color: var(--bs-secondary-color);
+}
+
+.map-link {
+  display: inline-block;
+  margin-left: 0.25rem;
+  color: var(--bs-secondary-color);
+  text-decoration: none;
+  transition: color 150ms ease, transform 150ms ease;
+}
+
+.map-link:hover,
+.map-link:focus-visible {
+  color: var(--bs-primary);
+  transform: scale(1.15);
+}
+
+.ticket-pass {
+  border-top: 0.35rem solid #0d6efd;
+}
+
+.ticket-qr {
+  width: 220px;
+  height: 220px;
+}
+
+.scanner-reader {
+  width: 100%;
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+[data-bs-theme="dark"] body {
+  background:
+    radial-gradient(ellipse 75% 55% at 14% 28%, rgba(88, 55, 137, 0.56), transparent 68%),
+    radial-gradient(ellipse 55% 54% at 88% 58%, rgba(131, 50, 45, 0.46), transparent 72%),
+    linear-gradient(160deg, #202020 0%, #1d1b21 48%, #111216 100%);
+  background-attachment: fixed;
+}
+
+[data-bs-theme="dark"] .navbar {
+  background: #172554 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+[data-bs-theme="dark"] .site-footer {
+  background: #0a1020;
+}
+
+[data-bs-theme="dark"] .card {
+  background-color: rgba(33, 38, 48, 0.92);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 0.5rem 1.25rem rgba(0, 0, 0, 0.22) !important;
+}
+
+[data-bs-theme="light"] .card {
+  background-color: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(8px);
+}
+
+[data-bs-theme="dark"] .table-light {
+  --bs-table-bg: #1f2937;
+  --bs-table-color: #f8fafc;
+}
+
+[data-bs-theme="dark"] .ticket-qr {
+  background: #fff;
+  border-radius: 0.5rem;
+  padding: 0.25rem;
+}
+
+@media print {
+  body {
+    background: #fff;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .ticket-pass {
+    break-inside: avoid;
+    box-shadow: none !important;
+    border: 1px solid #adb5bd;
+  }
+
+  main.container {
+    max-width: none;
+    padding: 0;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .site-footer {
+    padding: 2rem 1rem 1.7rem;
+  }
+
+  .footer-note {
+    font-size: 0.76rem;
+  }
+}

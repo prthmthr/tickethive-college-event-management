@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+{% block title %}Admin Analytics | TicketHive{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
+  <div>
+    <p class="text-uppercase text-primary fw-semibold small mb-1">Administration</p>
+    <h1 class="h2 mb-0">Event Analytics &amp; Attendance</h1>
+  </div>
+  <div class="d-flex flex-wrap align-items-center gap-3">
+    <span class="text-secondary small">Counts reflect the latest database state.</span>
+    <a class="btn btn-primary" href="{{ url_for('events.create_event') }}">Add event</a>
+  </div>
+</div>
+
+<section class="row g-3 mb-4" aria-label="Event summary">
+  <div class="col-6 col-xl-3">
+    <div class="card stat-card h-100 shadow-sm">
+      <div class="card-body">
+        <p class="text-secondary small mb-1">Events hosted</p>
+        <p class="display-6 fw-semibold mb-0">{{ total_events }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-3">
+    <div class="card stat-card h-100 shadow-sm">
+      <div class="card-body">
+        <p class="text-secondary small mb-1">Total registrations</p>
+        <p class="display-6 fw-semibold mb-0">{{ total_registrations }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-3">
+    <div class="card stat-card h-100 shadow-sm">
+      <div class="card-body">
+        <p class="text-secondary small mb-1">Checked in</p>
+        <p class="display-6 fw-semibold text-success mb-0">{{ total_checked_in }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-3">
+    <div class="card stat-card h-100 shadow-sm">
+      <div class="card-body">
+        <p class="text-secondary small mb-1">Remaining unattended</p>
+        <p class="display-6 fw-semibold text-warning-emphasis mb-0">{{ total_remaining }}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="card shadow-sm mb-4">
+  <div class="card-body p-3 p-lg-4">
+    <div class="mb-3">
+      <h2 class="h4 mb-1">Registration and check-in overview</h2>
+      <p class="text-secondary small mb-0">Compare total registrations with live event attendance.</p>
+    </div>
+    {% if chart_data %}
+      <div class="attendance-chart-wrapper">
+        <canvas id="attendance-chart" aria-label="Event registrations and check-ins chart" role="img"></canvas>
+      </div>
+    {% else %}
+      <div class="alert alert-info mb-0">Create an event to view attendance analytics.</div>
+    {% endif %}
+  </div>
+</section>
+
+<section class="card shadow-sm">
+  <div class="card-body p-0">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 p-3 p-lg-4">
+      <div>
+        <h2 class="h4 mb-1">Attendance by event</h2>
+        <p class="text-secondary small mb-0">Checked-in students compared with registered students.</p>
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th scope="col">Event</th>
+            <th scope="col">Date</th>
+            <th scope="col" class="text-end">Registered</th>
+            <th scope="col" class="text-end">Checked in</th>
+            <th scope="col" class="text-end">Remaining</th>
+            <th scope="col" style="min-width: 190px">Attendance</th>
+            <th scope="col" class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in events %}
+            <tr>
+              <th scope="row">
+                <div class="fw-semibold">{{ item.event.title }}</div>
+                <div class="text-secondary small">{{ item.event.department }}</div>
+              </th>
+              <td>{{ item.event.date_time.strftime('%b %d, %Y · %I:%M %p') }}</td>
+              <td class="text-end">{{ item.registrations }}</td>
+              <td class="text-end">{{ item.checked_in }}</td>
+              <td class="text-end">{{ item.remaining }}</td>
+              <td>
+                <div class="d-flex justify-content-between small mb-1">
+                  <span>{{ item.checked_in }} / {{ item.registrations }}</span>
+                  <span>{{ item.progress }}%</span>
+                </div>
+                <div class="progress" role="progressbar" aria-label="{{ item.event.title }} attendance" aria-valuenow="{{ item.progress }}" aria-valuemin="0" aria-valuemax="100">
+                  <div class="progress-bar {% if item.progress == 100 %}bg-success{% endif %}" style="width: {{ item.progress }}%;"></div>
+                </div>
+              </td>
+              <td class="text-end">
+                <div class="d-inline-flex gap-1">
+                  <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('events.event_detail', event_id=item.event.id) }}">Details</a>
+                  <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('events.edit_event', event_id=item.event.id) }}">Edit</a>
+                  <a class="btn btn-sm btn-outline-primary" href="{{ url_for('admin.export_attendance', event_id=item.event.id) }}">Export CSV</a>
+                  <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('scanner.scanner_page', event_id=item.event.id) }}">Scanner</a>
+                  <form method="post" action="{{ url_for('events.delete_event', event_id=item.event.id) }}" class="d-inline" onsubmit="return confirm('Remove this event and all its ticket records?');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button class="btn btn-sm btn-outline-danger" type="submit">Remove</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="7" class="text-center text-secondary py-5">No events have been created yet.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+{% if chart_data %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script>
+  (() => {
+    const chartData = {{ chart_data | tojson }};
+    const darkTheme = document.documentElement.getAttribute("data-bs-theme") === "dark";
+    const textColor = darkTheme ? "#d1d5db" : "#475569";
+    new Chart(document.getElementById("attendance-chart"), {
+      type: "bar",
+      data: {
+        labels: chartData.map((item) => item.title),
+        datasets: [
+          {
+            label: "Registrations",
+            data: chartData.map((item) => item.registrations),
+            backgroundColor: "rgba(13, 110, 253, 0.72)",
+            borderRadius: 6,
+          },
+          {
+            label: "Checked in",
+            data: chartData.map((item) => item.checked_in),
+            backgroundColor: "rgba(25, 135, 84, 0.76)",
+            borderRadius: 6,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { labels: { color: textColor } } },
+        scales: {
+          x: { ticks: { color: textColor }, grid: { display: false } },
+          y: { beginAtZero: true, ticks: { precision: 0, color: textColor }, grid: { color: darkTheme ? "rgba(255,255,255,0.1)" : "rgba(15,23,42,0.08)" } },
+        },
+      },
+    });
+  })();
+</script>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}My tickets | TicketHive{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4 no-print">
+  <div>
+    <h1 class="h2 mb-1">My tickets</h1>
+    <p class="text-secondary mb-0">Your event passes and QR codes.</p>
+  </div>
+</div>
+
+{% if tickets %}
+  <div class="ticket-list">
+    {% for ticket in tickets %}
+      <article class="card ticket-pass shadow-sm mb-4">
+        <div class="card-body p-4 p-lg-5">
+          <div class="row align-items-center g-4">
+            <div class="col-md">
+              <p class="text-uppercase text-primary fw-semibold small mb-2">TicketHive Event Pass</p>
+              <h2 class="h3 mb-4">{{ ticket.event.title }}</h2>
+              <dl class="row mb-0">
+                <dt class="col-sm-4">Student</dt>
+                <dd class="col-sm-8">{{ current_user.name }}</dd>
+                <dt class="col-sm-4">Date and time</dt>
+                <dd class="col-sm-8">{{ ticket.event.date_time.strftime('%B %d, %Y at %I:%M %p') }}</dd>
+                <dt class="col-sm-4">Location</dt>
+                <dd class="col-sm-8">{{ ticket.event.location }}</dd>
+                <dt class="col-sm-4">Ticket status</dt>
+                <dd class="col-sm-8">
+                  {% if ticket.is_checked_in %}
+                    <span class="badge text-bg-success">Checked in</span>
+                  {% else %}
+                    <span class="badge text-bg-secondary">Not checked in</span>
+                  {% endif %}
+                </dd>
+              </dl>
+            </div>
+            <div class="col-md-auto text-center">
+              <img class="ticket-qr img-fluid" src="data:image/png;base64,{{ qr_codes[ticket.id] }}" alt="QR code for {{ ticket.event.title }} ticket">
+              <p class="small text-secondary mt-2 mb-0">Show this code at event check-in.</p>
+            </div>
+          </div>
+          <hr class="my-4 no-print">
+          <div class="d-flex justify-content-between align-items-center gap-3 no-print">
+            <span class="small text-secondary">Ticket #{{ ticket.id }}</span>
+            <div class="d-flex flex-wrap justify-content-end gap-2">
+              <button class="btn btn-primary" type="button" onclick="window.print()">Print / Save PDF</button>
+              {% if not ticket.is_checked_in %}
+                <form method="post" action="{{ url_for('tickets.cancel_ticket', ticket_id=ticket.id) }}" onsubmit="return confirm('Cancel your registration for {{ ticket.event.title }}?');">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button class="btn btn-outline-danger" type="submit">Cancel registration</button>
+                </form>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </article>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="alert alert-info">You do not have any tickets yet.</div>
+{% endif %}
+{% endblock %}

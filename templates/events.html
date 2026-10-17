@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block title %}Events | TicketHive{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
+  <div>
+    <p class="text-uppercase text-primary fw-semibold small mb-1">Campus calendar</p>
+    <h1 class="h2 mb-0">TicketHive events</h1>
+  </div>
+  {% if current_user.is_authenticated and current_user.role == 'admin' %}
+    <a class="btn btn-primary" href="{{ url_for('events.create_event') }}">Add Event</a>
+  {% endif %}
+</div>
+
+<form class="card search-filter-card shadow-sm mb-4" method="get">
+  <div class="card-body p-3">
+    <div class="row g-2 align-items-end">
+      <div class="col-md-5">
+        <label class="form-label small mb-1" for="event-search">Search events</label>
+        <input class="form-control" id="event-search" name="q" type="search" value="{{ search_query }}" placeholder="Search by title or description">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label small mb-1" for="department-filter">Department</label>
+        <select class="form-select" id="department-filter" name="department">
+          <option value="">All departments</option>
+          {% for department in departments %}
+            <option value="{{ department }}" {% if department == selected_department %}selected{% endif %}>{{ department }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small mb-1" for="status-filter">When</label>
+        <select class="form-select" id="status-filter" name="status">
+          <option value="all" {% if selected_status == 'all' %}selected{% endif %}>All events</option>
+          <option value="upcoming" {% if selected_status == 'upcoming' %}selected{% endif %}>Upcoming</option>
+          <option value="past" {% if selected_status == 'past' %}selected{% endif %}>Past</option>
+        </select>
+      </div>
+      <div class="col-md-2 d-flex gap-2">
+        <button class="btn btn-primary flex-grow-1" type="submit">Filter</button>
+        <a class="btn btn-outline-secondary" href="{{ url_for('events.event_list') }}">Clear</a>
+      </div>
+    </div>
+  </div>
+</form>
+
+<div class="row g-4">
+  {% for item in events %}
+    <div class="col-md-6 col-xl-4">
+      <article class="card event-card shadow-sm h-100">
+        {% if item.event.image_filename %}
+          <img class="event-cover-image" src="{{ url_for('static', filename='uploads/' ~ item.event.image_filename) }}" alt="{{ item.event.title }} event cover">
+        {% endif %}
+        <div class="card-body p-4 d-flex flex-column">
+          <div class="d-flex justify-content-between gap-3 mb-3">
+            <span class="badge text-bg-primary">{{ item.event.department }}</span>
+            <span class="small text-secondary">{{ item.registrations }} registered</span>
+          </div>
+          <h2 class="h4">{{ item.event.title }}</h2>
+          {% if item.event.description %}
+            <p class="text-secondary">{{ item.event.description }}</p>
+          {% endif %}
+          <dl class="row small mt-auto mb-3">
+            <dt class="col-4">When</dt>
+            <dd class="col-8">{{ item.event.date_time.strftime('%b %d, %Y · %I:%M %p') }}</dd>
+            <dt class="col-4">Where</dt>
+            <dd class="col-8 event-location">
+              <span>{{ item.event.location }}</span>
+              {% if item.event.map_url %}
+                <a class="map-link" href="{{ item.event.map_url }}" target="_blank" rel="noopener noreferrer" title="Open location in Google Maps" aria-label="Open {{ item.event.title }} location in Google Maps">🔗</a>
+              {% endif %}
+            </dd>
+            <dt class="col-4">Capacity</dt>
+            <dd class="col-8">{{ item.event.capacity }}</dd>
+          </dl>
+
+          <div class="d-grid gap-2 mt-auto">
+            <a class="btn btn-outline-primary" href="{{ url_for('events.event_detail', event_id=item.event.id) }}">View details</a>
+          {% if current_user.is_authenticated and current_user.role == 'student' %}
+            {% if item.event.id in registered_event_ids %}
+              <a class="btn btn-outline-success w-100" href="{{ url_for('tickets.my_tickets') }}">Registered · View my tickets</a>
+            {% elif item.registrations >= item.event.capacity %}
+              <button class="btn btn-outline-secondary w-100" type="button" disabled>Event full</button>
+            {% else %}
+              <form method="post" action="{{ url_for('tickets.register_event', event_id=item.event.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button class="btn btn-primary w-100" type="submit">Register for event</button>
+              </form>
+            {% endif %}
+          {% elif not current_user.is_authenticated %}
+            <a class="btn btn-primary w-100" href="{{ url_for('auth.login') }}">Log in to register</a>
+          {% else %}
+              <a class="btn btn-outline-secondary" href="{{ url_for('events.edit_event', event_id=item.event.id) }}">Edit event</a>
+              <a class="btn btn-outline-primary" href="{{ url_for('scanner.scanner_page', event_id=item.event.id) }}">Open scanner</a>
+              <form method="post" action="{{ url_for('events.delete_event', event_id=item.event.id) }}" onsubmit="return confirm('Remove this event and all its ticket records?');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button class="btn btn-outline-danger w-100" type="submit">Remove event</button>
+              </form>
+          {% endif %}
+          </div>
+        </div>
+      </article>
+    </div>
+  {% else %}
+    <div class="col-12">
+      <div class="alert alert-info mb-0">There are no events to show yet.</div>
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% set is_editing = event is defined and event %}
+{% block title %}{{ 'Edit event' if is_editing else 'Add event' }} | TicketHive{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8 col-xl-7">
+    <div class="mb-4">
+      <p class="text-uppercase text-primary fw-semibold small mb-1">Administrator</p>
+      <h1 class="h2 mb-0">{{ 'Edit event details' if is_editing else 'Add event details' }}</h1>
+    </div>
+    <div class="card shadow-sm">
+      <div class="card-body p-4 p-lg-5">
+        <form method="post" enctype="multipart/form-data">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <div class="mb-3">
+            <label class="form-label" for="title">Event title</label>
+            <input class="form-control" id="title" name="title" maxlength="200" value="{{ request.form.get('title', event.title if is_editing else '') }}" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="description">Description</label>
+            <textarea class="form-control" id="description" name="description" rows="4">{{ request.form.get('description', event.description if is_editing else '') }}</textarea>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="image">Event picture <span class="text-secondary fw-normal">(optional)</span></label>
+            <input class="form-control" id="image" name="image" type="file" accept="image/jpeg,image/png,image/webp,image/gif">
+            <div class="form-text">JPG, PNG, WEBP, or GIF. Maximum file size: 5 MB.</div>
+            {% if is_editing and event.image_filename %}
+              <div class="form-check mt-2">
+                <input class="form-check-input" id="remove_image" name="remove_image" type="checkbox">
+                <label class="form-check-label" for="remove_image">Remove the current image</label>
+              </div>
+            {% endif %}
+          </div>
+          <div class="row g-3">
+            <div class="col-md-6 mb-3">
+              <label class="form-label" for="department">Department</label>
+              <input class="form-control" id="department" name="department" maxlength="120" value="{{ request.form.get('department', event.department if is_editing else '') }}" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label" for="capacity">Capacity</label>
+              <input class="form-control" id="capacity" name="capacity" type="number" min="1" step="1" value="{{ request.form.get('capacity', event.capacity if is_editing else '100') }}" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label" for="date_time">Date and time (local to the event)</label>
+              <input class="form-control" id="date_time" name="date_time" type="datetime-local" value="{{ request.form.get('date_time', event.date_time.strftime('%Y-%m-%dT%H:%M') if is_editing else '') }}" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label" for="location">Location name</label>
+              <input class="form-control" id="location" name="location" maxlength="200" placeholder="Main Auditorium" value="{{ request.form.get('location', event.location if is_editing else '') }}" required>
+            </div>
+            <div class="col-12 mb-3">
+              <label class="form-label" for="location_url">Google Maps link <span class="text-secondary fw-normal">(optional)</span></label>
+              <div class="input-group">
+                <span class="input-group-text" aria-hidden="true">🔗</span>
+                <input class="form-control" id="location_url" name="location_url" type="url" maxlength="500" placeholder="https://maps.app.goo.gl/..." value="{{ request.form.get('location_url', event.location_url if is_editing else '') }}">
+              </div>
+              <div class="form-text">Paste a Google Maps share link. Visitors can open it directly from the event card.</div>
+            </div>
+          </div>
+          <div class="d-flex flex-wrap gap-2 mt-2">
+            <button class="btn btn-primary" type="submit">{{ 'Save changes' if is_editing else 'Add event' }}</button>
+            <a class="btn btn-outline-secondary" href="{{ url_for('events.event_detail', event_id=event.id) if is_editing else url_for('admin.dashboard') }}">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

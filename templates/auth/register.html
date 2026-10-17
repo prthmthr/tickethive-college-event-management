@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Create account | TicketHive{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-7 col-lg-5">
+    <div class="card shadow-sm">
+      <div class="card-body p-4">
+        <h1 class="h3 mb-3">Create a student account</h1>
+        <form method="post" novalidate>
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <div class="mb-3">
+            <label class="form-label" for="name">Full name</label>
+            <input class="form-control" id="name" name="name" type="text" maxlength="120" autocomplete="name" value="{{ request.form.get('name', '') }}" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="email">Email</label>
+            <input class="form-control" id="email" name="email" type="email" maxlength="255" autocomplete="email" value="{{ request.form.get('email', '') }}" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="password">Password</label>
+            <div class="input-group">
+              <input class="form-control" id="password" name="password" type="password" minlength="8" autocomplete="new-password" required>
+              <button class="btn btn-outline-secondary password-toggle" type="button" data-password-target="password" aria-label="Show password" aria-pressed="false">Show</button>
+            </div>
+            <div class="form-text">Use at least 8 characters.</div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="confirm_password">Confirm password</label>
+            <div class="input-group">
+              <input class="form-control" id="confirm_password" name="confirm_password" type="password" minlength="8" autocomplete="new-password" required>
+              <button class="btn btn-outline-secondary password-toggle" type="button" data-password-target="confirm_password" aria-label="Show password confirmation" aria-pressed="false">Show</button>
+            </div>
+          </div>
+          <button class="btn btn-primary w-100" type="submit">Create account</button>
+        </form>
+        <p class="mt-3 mb-0 text-center">Already registered? <a href="{{ url_for('auth.login') }}">Log in</a></p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/password-toggle.js') }}"></script>
+{% endblock %}

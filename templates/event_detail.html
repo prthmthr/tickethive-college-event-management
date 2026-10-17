@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}{{ event.title }} | TicketHive{% endblock %}
+{% block content %}
+<div class="mb-4">
+  <a class="link-secondary text-decoration-none small" href="{{ url_for('events.event_list') }}">← Back to events</a>
+</div>
+
+<article class="card event-detail-card shadow-sm overflow-hidden">
+  <div class="row g-0">
+    {% if event.image_filename %}
+      <div class="col-lg-5">
+        <img class="event-detail-image" src="{{ url_for('static', filename='uploads/' ~ event.image_filename) }}" alt="{{ event.title }} event cover">
+      </div>
+    {% endif %}
+    <div class="{% if event.image_filename %}col-lg-7{% else %}col-12{% endif %}">
+      <div class="card-body p-4 p-lg-5">
+        <div class="d-flex flex-wrap justify-content-between gap-2 mb-3">
+          <span class="badge text-bg-primary">{{ event.department }}</span>
+          <span class="text-secondary small">{{ registrations }} of {{ event.capacity }} seats registered</span>
+        </div>
+        <h1 class="display-6 fw-semibold mb-3">{{ event.title }}</h1>
+        {% if event.description %}
+          <p class="lead text-secondary">{{ event.description }}</p>
+        {% endif %}
+
+        <dl class="row mt-4 mb-4">
+          <dt class="col-sm-4">Date and time</dt>
+          <dd class="col-sm-8">{{ event.date_time.strftime('%A, %B %d, %Y · %I:%M %p') }}</dd>
+          <dt class="col-sm-4">Location</dt>
+          <dd class="col-sm-8 event-location">
+            {{ event.location }}
+            {% if event.map_url %}
+              <a class="map-link" href="{{ event.map_url }}" target="_blank" rel="noopener noreferrer" title="Open location in Google Maps" aria-label="Open location in Google Maps">🔗 Open map</a>
+            {% endif %}
+          </dd>
+          <dt class="col-sm-4">Availability</dt>
+          <dd class="col-sm-8">{{ event.capacity - registrations }} seats remaining</dd>
+        </dl>
+
+        {% if current_user.is_authenticated and current_user.role == 'student' %}
+          {% if ticket %}
+            <a class="btn btn-outline-success" href="{{ url_for('tickets.my_tickets') }}">Already registered · View my ticket</a>
+          {% elif is_full %}
+            <button class="btn btn-outline-secondary" type="button" disabled>This event is full</button>
+          {% else %}
+            <form method="post" action="{{ url_for('tickets.register_event', event_id=event.id) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="btn btn-primary" type="submit">Register for event</button>
+            </form>
+          {% endif %}
+        {% elif not current_user.is_authenticated %}
+          <a class="btn btn-primary" href="{{ url_for('auth.login') }}">Log in to register</a>
+        {% else %}
+          <div class="d-flex flex-wrap gap-2">
+            <a class="btn btn-primary" href="{{ url_for('events.edit_event', event_id=event.id) }}">Edit event</a>
+            <a class="btn btn-outline-secondary" href="{{ url_for('scanner.scanner_page', event_id=event.id) }}">Open scanner</a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</article>
+{% endblock %}
